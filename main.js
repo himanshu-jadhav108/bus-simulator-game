@@ -268,18 +268,25 @@ class Game {
       this.fpsFrames = 0;
     }
 
+    // Always update controls to allow unpausing
+    this.controls.update(dt);
+    if (this.controls.pausePressed && !this._lastPause) {
+      this.paused = !this.paused;
+      if (!this.paused) this._closeGarage();
+    }
+    this._lastPause = this.controls.pausePressed;
+
     if (!this.paused) {
       this._update(dt);
     }
 
+    this._updateUI();
     this._render();
   }
 
   _update(dt) {
     this.sessionTime += dt;
 
-    // Controls
-    this.controls.update(dt);
     const input = this.controls.getInput();
 
     // One-shot button checks
@@ -301,11 +308,6 @@ class Game {
       this.ui.showNotification('📷 ' + modeName, 'info', 1500);
     }
     this._lastCamera = this.controls.cameraPressed;
-
-    if (this.controls.pausePressed && !this._lastPause) {
-      this.paused = !this.paused;
-    }
-    this._lastPause = this.controls.pausePressed;
 
     if (this.controls.weatherPressed && !this._lastWeather) {
       const w = this.weather.cycle();
@@ -445,14 +447,21 @@ class Game {
 
     // Weather update
     this.weather.update(dt, this.bus.getPosition());
+  }
 
-    // UI update
+  _updateUI() {
+    let currentStop = 'En Route';
+    if (this._lastNearStop) {
+      const dist = this.bus.getPosition().distanceTo(this._lastNearStop.position);
+      if (dist < 10) currentStop = this._lastNearStop.name;
+    }
+
     this.ui.update({
       speed: this.bus.getSpeed(),
       fuel: this.bus.physics.fuel,
       money: this.money,
       passengers: this.passengers.getOnboardCount(),
-      currentStop: nearestStop && nearestDist < 10 ? nearestStop.name : 'En Route',
+      currentStop: currentStop,
       fps: this.fps,
       gear: this.bus.physics.speed < -1 ? 'R' : (this.bus.physics.speed < 1 ? 'N' : 'D'),
       weather: this.weather.current,
