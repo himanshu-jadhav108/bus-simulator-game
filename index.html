@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#0a0e16">
+  <title>City Bus Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CANVAS
+═══════════════════════════════════════════════════════════════════ -->
+<canvas id="game-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════════════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="loading-bus-icon">🚌</div>
+  <div class="loading-title">City Bus Simulator</div>
+  <div class="loading-sub">Loading city...</div>
+  <div class="loading-bar-wrap">
+    <div class="loading-bar-fill"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HUD
+═══════════════════════════════════════════════════════════════════ -->
+<div id="hud">
+
+  <!-- TOP ROW: dashboard cards -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+
+    <!-- Left: speed / fuel / money / passengers / stop -->
+    <div id="dashboard">
+      <!-- Speed -->
+      <div class="dash-card">
+        <span class="dash-label">Speed</span>
+        <span class="dash-value speed-num" id="speed-val">0</span>
+        <span class="speed-unit">km/h</span>
+      </div>
+
+      <!-- Fuel -->
+      <div class="dash-card">
+        <span class="dash-label">Fuel</span>
+        <div class="fuel-bar-wrap"><div id="fuel-bar"></div></div>
+        <span class="dash-value" id="fuel-val" style="font-size:0.9rem;margin-top:3px">100%</span>
+      </div>
+
+      <!-- Money -->
+      <div class="dash-card">
+        <span class="dash-label">Earnings</span>
+        <span class="dash-value money-val" id="money-val">$50.00</span>
+      </div>
+
+      <!-- Passengers -->
+      <div class="dash-card">
+        <span class="dash-label">Pax</span>
+        <span class="dash-value pass-val" id="passengers-val">0</span>
+      </div>
+      
+      <!-- Satisfaction -->
+      <div class="dash-card">
+        <span class="dash-label">Rating</span>
+        <span class="dash-value" id="rating-val" style="color:var(--green)">100%</span>
+      </div>
+
+      <!-- Gear -->
+      <div class="dash-card" style="min-width:40px">
+        <span class="dash-label">Gear</span>
+        <span class="dash-value" id="gear-val">1</span>
+      </div>
+    </div>
+
+    <!-- Right: weather + fps -->
+    <div id="top-right">
+      <div class="status-pill">
+        <span id="weather-icon">☀️</span>
+        <span id="fps-val">60</span><span style="opacity:.4;font-size:.7rem"> fps</span>
+      </div>
+      <div class="status-pill" style="font-size:0.7rem; padding: 3px 10px;">
+        <span id="stop-name" style="color:rgba(255,255,255,0.7)">En Route</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Middle spacer + stop approach indicator -->
+  <div style="flex:1;position:relative;">
+    <div id="stop-indicator"></div>
+  </div>
+
+  <!-- BOTTOM CONTROLS -->
+  <div id="controls-bar">
+
+    <!-- LEFT: Steering Wheel -->
+    <div id="steer-zone">
+      <div id="steering-wheel" aria-label="Steering wheel">
+        <div class="wheel-rim"></div>
+        <div class="wheel-spoke"></div>
+        <div class="wheel-spoke"></div>
+        <div class="wheel-spoke"></div>
+        <div class="wheel-hub"></div>
+      </div>
+      <div class="wheel-label">STEER</div>
+    </div>
+
+    <!-- CENTER: Action buttons -->
+    <div id="action-btns">
+      <div class="action-row">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action btn-horn" id="btn-horn" aria-label="Horn">📯</button>
+          <span class="btn-label">Horn</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action btn-doors" id="btn-doors" aria-label="Doors">🚪</button>
+          <span class="btn-label">Doors</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action" id="btn-lights" aria-label="Lights">💡</button>
+          <span class="btn-label">Lights</span>
+        </div>
+      </div>
+      <div class="action-row">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action" id="btn-camera" aria-label="Camera">📷</button>
+          <span class="btn-label">Camera</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action" id="btn-weather" aria-label="Weather">🌦️</button>
+          <span class="btn-label">Weather</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action" id="btn-garage" aria-label="Garage">🔧</button>
+          <span class="btn-label">Garage</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="btn-action" id="btn-pause" aria-label="Pause">⏸</button>
+          <span class="btn-label">Pause</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Accelerate / Brake -->
+    <div id="pedal-zone">
+      <button class="pedal-btn" id="btn-accel" aria-label="Accelerate">
+        <span class="pedal-icon">▲</span>
+        <span class="pedal-text">GO</span>
+      </button>
+      <button class="pedal-btn" id="btn-brake" aria-label="Brake">
+        <span class="pedal-icon">▼</span>
+        <span class="pedal-text">BRAKE</span>
+      </button>
+    </div>
+
+  </div><!-- /controls-bar -->
+</div><!-- /hud -->
+
+<!-- Notification toast -->
+<div id="notification"></div>
+
+<!-- Route strip -->
+<div id="route-strip">
+  🚌 Route 42 — City Loop · Pick up passengers at bus stops
+</div>
+
+<!-- PAUSE SCREEN -->
+<div id="pause-screen">
+  <div class="pause-title">⏸ PAUSED</div>
+  <div class="pause-sub">CITY BUS SIMULATOR</div>
+  <div class="pause-controls">
+    <div>⬆ / W &nbsp;—&nbsp; Accelerate</div>
+    <div>⬇ / S &nbsp;—&nbsp; Reverse</div>
+    <div>◀ ▶ / A D &nbsp;—&nbsp; Steer</div>
+    <div>SPACE &nbsp;—&nbsp; Brake</div>
+    <div>H &nbsp;—&nbsp; Horn &nbsp;|&nbsp; O &nbsp;—&nbsp; Doors</div>
+    <div>L &nbsp;—&nbsp; Lights &nbsp;|&nbsp; C &nbsp;—&nbsp; Camera</div>
+    <div>W (key) &nbsp;—&nbsp; Weather cycle</div>
+    <div>ESC &nbsp;—&nbsp; Pause / Resume</div>
+    <br>
+    <div style="color:rgba(255,255,255,0.35)">Tap anywhere or press ESC to resume</div>
+  </div>
+</div>
+
+<!-- GARAGE SCREEN -->
+<div id="garage-screen" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+  <div class="pause-title" style="margin-bottom:0.5rem">🔧 GARAGE</div>
+  <div class="pause-sub" style="margin-bottom:2rem">UPGRADE YOUR BUS</div>
+  
+  <div style="display:flex; gap: 2rem;">
+    <!-- Engine -->
+    <div style="background:rgba(255,255,255,0.1); padding: 1.5rem; border-radius:12px; text-align:center; border: 1px solid rgba(255,200,50,0.3); width: 200px;">
+      <div style="font-size:2rem">🏎️</div>
+      <h3 style="color:#ffc832; margin: 10px 0;">ENGINE</h3>
+      <div style="font-size:0.8rem; color:rgba(255,255,255,0.7); margin-bottom:15px;">Increases Top Speed</div>
+      <div style="font-weight:bold; font-size: 1.2rem; margin-bottom:15px; color:#44ff88;" id="engine-cost">$100</div>
+      <button id="btn-upgrade-engine" style="background:#ffc832; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; width:100%;">UPGRADE</button>
+    </div>
+    
+    <!-- Brakes -->
+    <div style="background:rgba(255,255,255,0.1); padding: 1.5rem; border-radius:12px; text-align:center; border: 1px solid rgba(255,200,50,0.3); width: 200px;">
+      <div style="font-size:2rem">🛑</div>
+      <h3 style="color:#ffc832; margin: 10px 0;">BRAKES</h3>
+      <div style="font-size:0.8rem; color:rgba(255,255,255,0.7); margin-bottom:15px;">Increases Stopping Power</div>
+      <div style="font-weight:bold; font-size: 1.2rem; margin-bottom:15px; color:#44ff88;" id="brakes-cost">$100</div>
+      <button id="btn-upgrade-brakes" style="background:#ffc832; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; width:100%;">UPGRADE</button>
+    </div>
+  </div>
+  
+  <button id="btn-close-garage" style="margin-top:2rem; background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.3); padding:10px 30px; border-radius:20px; cursor:pointer;">CLOSE GARAGE</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THREE.JS (CDN, offline-cacheable)
+═══════════════════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GAME MODULES
+═══════════════════════════════════════════════════════════════════ -->
+<script type="module" src="main.js"></script>
+
+<!-- Resume on background tap -->
+<script>
+  document.getElementById('pause-screen').addEventListener('click', () => {
+    if (window._game) window._game.paused = false;
+    document.getElementById('pause-screen').style.display = 'none';
+  });
+</script>
+</body>
+</html>
