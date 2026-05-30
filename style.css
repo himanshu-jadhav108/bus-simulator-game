@@ -1,0 +1,498 @@
+/* style.css - City Bus Simulator UI */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+:root {
+  --hud-bg: rgba(0, 0, 0, 0.72);
+  --hud-border: rgba(255, 200, 50, 0.35);
+  --accent: #ffc832;
+  --accent2: #ff6b00;
+  --green: #00e86c;
+  --red: #ff3322;
+  --blue: #2288ff;
+  --font-main: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-main);
+  touch-action: none;
+}
+
+/* ── CANVAS ───────────────────────────────────────────────────────── */
+#game-canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 0;
+}
+
+/* ── LOADING SCREEN ────────────────────────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a0e16;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.6s ease;
+}
+
+.loading-bus-icon {
+  font-size: 5rem;
+  animation: busRide 1.2s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 20px rgba(255, 200, 50, 0.5));
+}
+
+@keyframes busRide {
+  from { transform: translateX(-10px) rotate(-2deg); }
+  to   { transform: translateX(10px) rotate(2deg); }
+}
+
+.loading-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 1.5rem 0 0.4rem;
+  text-shadow: 0 0 20px rgba(255, 200, 50, 0.4);
+}
+
+.loading-sub {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.loading-bar-wrap {
+  width: 240px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  margin-top: 2rem;
+  overflow: hidden;
+}
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 4px;
+  animation: loadProgress 1.6s ease-out forwards;
+}
+@keyframes loadProgress {
+  to { width: 100%; }
+}
+
+/* ── HUD WRAPPER ──────────────────────────────────────────────────── */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ── DASHBOARD (top strip) ────────────────────────────────────────── */
+#dashboard {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px 10px 0;
+  pointer-events: none;
+}
+
+.dash-card {
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  min-width: 62px;
+}
+
+.dash-label {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.dash-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--accent);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dash-value.speed-num {
+  font-size: 1.8rem;
+}
+
+.speed-unit {
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em;
+  margin-top: 1px;
+}
+
+/* Fuel bar */
+.fuel-bar-wrap {
+  width: 70px;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+#fuel-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #00cc44, #44ff88);
+  border-radius: 3px;
+  transition: width 0.3s, background 0.5s;
+}
+
+.money-val { color: #44ff88 !important; }
+.pass-val  { color: #88aaff !important; }
+
+/* Gear badge */
+#gear-val {
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+/* Weather + FPS row */
+#top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 10px 0;
+  margin-top: 160px; /* Room for minimap */
+  pointer-events: none;
+}
+
+.status-pill {
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#weather-icon { font-size: 1rem; }
+#fps-val { font-family: var(--font-mono); color: var(--green); }
+
+/* ── NOTIFICATION ─────────────────────────────────────────────────── */
+#notification {
+  position: fixed;
+  top: 85px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 8px 20px;
+  border-radius: 24px;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 50;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* ── STOP INDICATOR ───────────────────────────────────────────────── */
+#stop-indicator {
+  position: fixed;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  color: #fff;
+  text-align: center;
+  line-height: 1.6;
+  display: none;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+  z-index: 30;
+}
+#stop-indicator strong { color: var(--accent); display: block; }
+#stop-indicator span { color: rgba(255,255,255,0.55); font-size: 0.75rem; }
+
+/* ── CONTROLS BAR (bottom) ────────────────────────────────────────── */
+#controls-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px 14px;
+  pointer-events: auto;
+  gap: 8px;
+}
+
+/* Steering wheel left */
+#steer-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+#steering-wheel {
+  width: 115px;
+  height: 115px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #3a3a3a, #1a1a1a);
+  border: 4px solid #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: transform 0.08s ease;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  touch-action: none;
+}
+
+.wheel-rim {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 3px solid #666;
+}
+.wheel-spoke {
+  position: absolute;
+  width: 3px;
+  height: 42%;
+  background: #666;
+  border-radius: 2px;
+  transform-origin: bottom center;
+  bottom: 50%;
+  left: calc(50% - 1.5px);
+}
+.wheel-spoke:nth-child(2) { transform: rotate(120deg); }
+.wheel-spoke:nth-child(3) { transform: rotate(240deg); }
+.wheel-hub {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  z-index: 1;
+}
+
+.wheel-label {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Action buttons middle */
+#action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.action-row {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-action {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  background: var(--hud-bg);
+  color: #fff;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.1s, transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.btn-action:active, .btn-action.pressed {
+  background: rgba(255, 200, 50, 0.25);
+  transform: scale(0.92);
+  border-color: var(--accent);
+}
+.btn-action.btn-horn { background: rgba(255, 80, 0, 0.25); border-color: rgba(255, 80, 0, 0.4); }
+.btn-action.btn-doors { background: rgba(0, 180, 100, 0.2); }
+
+.btn-label {
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-top: 2px;
+  line-height: 1;
+}
+
+/* Accelerate / Brake right zone */
+#pedal-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.pedal-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 3px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.6rem;
+  font-weight: 700;
+  transition: transform 0.06s, opacity 0.06s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+#btn-accel {
+  background: radial-gradient(circle at 40% 35%, rgba(0,230,80,0.4), rgba(0,120,40,0.8));
+  border-color: rgba(0,230,80,0.6);
+  color: rgba(255,255,255,0.9);
+}
+#btn-accel:active {
+  transform: scale(0.88);
+  background: radial-gradient(circle at 40% 35%, rgba(0,255,100,0.5), rgba(0,160,50,0.9));
+}
+
+#btn-brake {
+  background: radial-gradient(circle at 40% 35%, rgba(255,50,30,0.4), rgba(160,20,10,0.8));
+  border-color: rgba(255,50,30,0.6);
+  color: rgba(255,255,255,0.9);
+}
+#btn-brake:active {
+  transform: scale(0.88);
+  background: radial-gradient(circle at 40% 35%, rgba(255,80,50,0.5), rgba(200,30,10,0.9));
+}
+
+.pedal-icon { line-height: 1; }
+.pedal-text {
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+
+/* ── PAUSE SCREEN ─────────────────────────────────────────────────── */
+#pause-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.pause-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(255, 200, 50, 0.5);
+  margin-bottom: 1rem;
+}
+
+.pause-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.15em;
+}
+
+.pause-controls {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: center;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+
+/* ── ROUTE INFO (bottom strip) ────────────────────────────────────── */
+#route-strip {
+  position: fixed;
+  bottom: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+  letter-spacing: 0.1em;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .dash-card { min-width: 52px; padding: 5px 8px; }
+  .dash-value.speed-num { font-size: 1.5rem; }
+  #steering-wheel { width: 100px; height: 100px; }
+  .pedal-btn { width: 66px; height: 66px; font-size: 1.4rem; }
+  .btn-action { width: 44px; height: 44px; }
+}
+
+@media (min-width: 768px) {
+  #steering-wheel { width: 130px; height: 130px; }
+  .pedal-btn { width: 88px; height: 88px; }
+  .btn-action { width: 58px; height: 58px; }
+}
